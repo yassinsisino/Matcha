@@ -1,0 +1,14 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "matcha API",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yharkati",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
