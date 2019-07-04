@@ -1,1 +1,1 @@
-docker run --name dbmatcha -e POSTGRES_PASSWORD=dbmatcha -p 5432:5432 -d postgres
+docker run --name dbmatcha -e POSTGRES_PASSWORD=dbmatcha -e POSTGRES_DB=matcha -p 5432:5432 -d postgres

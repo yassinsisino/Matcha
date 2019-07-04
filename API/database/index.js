@@ -1,12 +1,27 @@
-const {Pool} = require ('pg');
+const { Pool } = require('pg');
 
 require('dotenv').config();
 
 const pool = new Pool({
     host: process.env.DBHOST,
-    username: process.env.DBUSER,
+    user: process.env.DBUSER,
     password: process.env.DBPASSWORD,
     port: process.env.DBPORT,
+    database: process.env.DBNAME,
 });
 
-module.exports = pool;
+function query(req) {
+    pool.connect()
+    .then( (client) => {
+        return client.query(req)
+        .then(res => {
+            client.release()
+            console.log(res.row[0])
+        })
+        .catch(err => {
+            console.log('erreur requet', err)
+            client.release();
+        })
+    })
+}
+module.exports = query;
