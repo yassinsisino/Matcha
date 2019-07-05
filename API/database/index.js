@@ -10,18 +10,14 @@ const pool = new Pool({
     database: process.env.DBNAME,
 });
 
-function query(req) {
+const query = (req, res) => {
     pool.connect()
-    .then( (client) => {
-        return client.query(req)
-        .then(res => {
-            client.release()
-            console.log(res.row[0])
+        .then(client => {
+            client.query(req)
+            .then(res)
+            .catch(err => { console.log(err) })
+            .then(() => client.release())
         })
-        .catch(err => {
-            console.log('erreur requet', err)
-            client.release();
-        })
-    })
 }
+
 module.exports = query;
