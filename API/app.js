@@ -7,9 +7,7 @@ const db = require('./database');
 const app = express();
 const server = http.createServer(app);
 
-
 app.use((req, res, next) => {
-
     db('SELECT NOW()', (res1) => {
         res.write('<h1>Bienvenu sur matcha...<h1>');
         res.write('<h1>Bienvenu sur matcha...<h1>');
