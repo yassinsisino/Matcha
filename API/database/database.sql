@@ -1,6 +1,6 @@
 
 DROP SCHEMA IF EXISTS matcha;
-CREATE SCHEME IF NOT EXISTS matcha;
+CREATE SCHEMA IF NOT EXISTS matcha;
 
 DROP TABLE IF EXISTS "users" CASCADE;
 DROP TABLE IF EXISTS "matches" CASCADE;
@@ -24,14 +24,14 @@ CREATE TABLE IF NOT EXISTS users (
     gender genre DEFAULT 'O',
     orientation orientations DEFAULT 'BI',
     score SMALLINT DEFAULT 0,
-    active BOOLEAN DEFAULT 0,
-    complete BOOLEAN DEFAULT 0,
-    mailNotification BOOLEAN DEFAULT 1,
+    active BOOLEAN DEFAULT 'F',
+    complete BOOLEAN DEFAULT 'F',
+    mailNotification BOOLEAN DEFAULT 'T',
     activationKey VARCHAR(255),
     restoreKey VARCHAR(255),
     connexionLog TIMESTAMP,
     location JSON,
-    photos JSON,
+    photos JSON
 );
 
 CREATE TABLE IF NOT EXISTS likes (
@@ -45,18 +45,18 @@ CREATE TABLE IF NOT EXISTS visits (
     idVisite SERIAL PRIMARY KEY,
     idUser INTEGER NOT NULL REFERENCES users(idUser),
     visitedIdUser INTEGER NOT NULL REFERENCES users(idUser),
-    visitedDate TIMESTAMP DEFAULT NOW();
+    visitedDate TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS matches (
     idMatch SERIAL PRIMARY KEY,
     idUser1 INTEGER NOT NULL REFERENCES users(idUser),
     idUser2 INTEGER NOT NULL REFERENCES users(idUser),
-    matchedDate TIMESTAMP DEFAULT NOW();
+    matchedDate TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS tags (
     idTag SERIAL PRIMARY KEY,
     tag VARCHAR(20) NOT NULL,
-    idUser INTEGER NOT NULL REFERENCES users(idUser),
+    idUser INTEGER NOT NULL REFERENCES users(idUser)
 );
