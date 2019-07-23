@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './App.css';
+import './Register.css';
 
 class App extends Component {
     state = {
@@ -8,7 +8,9 @@ class App extends Component {
         mail: null,
         login: null,
         mot_de_passe: null,
-        errors: {}
+        errors: {},
+        disable: true,
+        errorBack: null
     };
 
     checkRegex = (id, value) => {
@@ -17,41 +19,57 @@ class App extends Component {
 
         if (id === 'nom') {
             regex = /^[A-Z]*(?:-[A-Z]+)*$/i;
-            regex.test(value);
-
+            if (!regex.test(value))
+                errors = '* Nom incorect';
         }
         else if (id === 'prenom'){
             regex = /^[A-Z]*(?:-[A-Z]+)*$/i;
             if (!regex.test(value))
-                errors = 'Prenom incorect';
-        }     
+                errors = '* Prenom incorect';
+        }   
         else if (id === 'mail') {
             regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-            regex.test(value);
+            if (!regex.test(value))
+                errors = '* Adresse Mail incorect';
         }
         else if (id === 'login') {
             regex= /^[A-Z][A-Z0-9]*(?:[-_][A-Z0-9]+)*$/i;
-            regex.test(value);
+            if (!regex.test(value))
+                errors = '* Login incorect';
         }
         else if (id === 'mot_de_passe') {
             regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
-            regex.test(value);
+            if (!regex.test(value))
+                errors = '* Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre';
         }
         return errors;
     }
 
     checkInput = (id, value, min, max) => {
-        let errors = null;
+        let error = null;
 
-        if (value.trim() === '')
-            errors = "Vide";
-        else if (value.length < min)
-            errors = `${min} characters min.`;
+        if (value.length < min)
+            error = `${min} characters min.`;
         else if (value.length > max)
-            errors = `${max} characters max.`;
-        else
-            errors = this.checkRegex(id, value);
-        return errors;
+            error = `${max} characters max.`;
+        else {
+            error = this.checkRegex(id, value);
+        }
+
+        return error;
+    }
+
+    checkForm () {
+        let { errors } = this.state;
+        let valid = true;
+
+        this.setState({ disable: true });
+
+        for(let field in errors) { // object[property];
+            if (errors[field] !== null) valid = false;
+        }
+
+        if (valid && Object.keys(errors).length === 5) this.setState({ disable: false });
     }
 
     change = (e, min, max) => {
@@ -60,20 +78,29 @@ class App extends Component {
  
         let error = null;
 
-        this.setState({ [id]: value });
-        error = this.checkInput(id, value, min, max);
-        errors[id] = error;
-        this.setState({ errors });
-        console.log(errors);
+        this.setState({ [id]: value }, () => {
+            error = this.checkInput(id, value, min, max);
+            errors[id] = error;
+            this.setState({ errors }, () => {
+                this.checkForm();
+            });
+        });
     };
 
     submit = (e) => {
         e.preventDefault();
-        console.log(this.state);
+        const { disable } = this.state;
+    
+        if (!disable) {
+            // axios
+            // post('', { nom, prenom .... })
+            // .then()  Redirection
+            // .catch(err => {  this.setState({ errorBack:  err.response.data.error })  })
+        }
     }
 
     render() {
-        const {errors} = this.state; // destructuration.
+        const {errors, disable, errorBack } = this.state;
         return (
             <div className="body">
                 <h1>Matcha</h1>
@@ -81,36 +108,32 @@ class App extends Component {
                 <form onSubmit ={this.submit}>
                     <label htmlFor ="nom">Nom :</label>
                     <input type="text" id="nom" placeholder="Nom" onChange={(e) => this.change(e, 2, 20)} />
-                    {this.state.nom}
                     <div>{errors.nom}</div>
                     <br></br>
 
                     <label htmlFor ="prenom">Prenom :</label>
-                    <input type="text" id="prenom" placeholder="Prenom" errors= {errors.prenom} onChange={(e) => this.change(e, 2, 20)} />
-                    {this.state.prenom}
-                    {errors.prenom}
+                    <input type="text" id="prenom" placeholder="Prenom"  onChange={(e) => this.change(e, 2, 20)} />
+                    <div>{errors.prenom}</div>
                     <br></br>
 
                     <label htmlFor ="mail">Mail :</label>
                     <input type="mail" id="mail" placeholder="Mail" onChange={(e) => this.change(e, null, 40)} />
-                    {this.state.mail}
-                    {errors.mail}
+                    <div>{errors.mail}</div>
                     <br></br>
 
                     <label htmlFor ="login">Login :</label>
                     <input type="text" id="login" placeholder="Login" onChange={(e) => this.change(e, 6, 15)} />
-                    {this.state.login}
-                    {errors.login}
+                    <div>{errors.login}</div>
                     <br></br>
 
                     <label htmlFor ="mot_de_passe">Mot de passe :</label>
                     <input type="password" id="mot_de_passe" placeholder="Mot de Passe" onChange={(e) => this.change(e, 6, 15)} />
-                    {this.state.mot_de_passe}
-                    {errors.mot_de_passe}
+                    <div>{errors.mot_de_passe}</div>
                     <br></br>
-                    
-                    <br></br>
-                    <button>Envoyez</button>
+
+                    <button disabled={disable}>Envoyez</button>
+                    <div>{errorBack}</div>
+
                 </form>
             </div>
         )
