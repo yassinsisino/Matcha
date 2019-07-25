@@ -20,32 +20,32 @@ const addUser = async (req, res) => {
 
 
     if (!firstName.match(regex_name) || (firstName.length < 2 && firstName.length > 20)) {
-        return res.status(409).json({ code: 409, message: 'Invalid Firstname ' });
+        return res.status(400).json({ code: 400, message: 'Invalid Firstname ' });
     }
     else if (!lastName.match(regex_name) || (lastName.length < 2 && lastName.length > 20)) {
-        return res.status(409).json({ code: 409, message: 'Invalid Lastname' });
+        return res.status(400).json({ code: 400, message: 'Invalid Lastname' });
     }
     else if (!username.match(regex_username) || (username.length < 2 && username.length > 20)) {
-        return res.status(409).json({ code: 409, message: 'Invalid Username' });
+        return res.status(400).json({ code: 400, message: 'Invalid Username' });
     }
     else if (!mail.match(regex_mail) || (mail.length < 5 && mail.length > 60)) {
-        return res.status(409).json({ code: 409, message: 'Invalid Mail' });
+        return res.status(400).json({ code: 400, message: 'Invalid Mail' });
     }
     else if (!password.match(regex_password) || password.length > 25) {
-        return res.status(409).json({ code: 409, message: 'Invalid Password' });
+        return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
     const exist_mail = util.promisify(getUserByMail);
     const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
     if (checkMail.name === 'error')
-        return res.status(409).json({ code: 409, message: 'Invalid request' });
+        return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkMail.rowCount !== 0)
-        return res.status(409).json({ code: 409, message: 'Mail already exist' });
+        return res.status(400).json({ code: 400, message: 'Mail already exist' });
     const exist_username = util.promisify(getUserByUsername);
     const checkUsername = await exist_username(username).then(result => result).catch(err => err);
     if (checkUsername.name === 'error')
-        return res.status(409).json({ code: 409, message: 'Invalid request' });
+        return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkUsername.rowCount !== 0)
-        return res.status(409).json({ code: 409, message: 'Usernamess already exist' });
+        return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
     const passwordCrypt = await bcrypt.hash(password, saltRound).then(hash => hash).catch(err => console.log('error', err));
     const activationKey = uniqid(Date.now() + '-');
     const activationUrl = 'http://localhost:3000/api/user/active/?activationKey=' + activationKey;
@@ -57,7 +57,7 @@ const addUser = async (req, res) => {
     }
     const requestStatus = await pool.query(request).then(data => data).catch(err => err)
     if (requestStatus.name === 'error')
-        return res.status(409).json({ code: 409, message: 'Invalid request' });
+        return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (requestStatus.rowCount !== 0) {
         const mailler = util.promisify(mailer.sendInscriptionMail);
         const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
@@ -68,8 +68,8 @@ const addUser = async (req, res) => {
                 values: [mail]
             }
             const deleteUser = await pool.query(deleteRequest).then(data => data).catch(err => err);
-            if (deleteUser.rowCount == 1){
-                return res.status(409).json({ code: 409, message: 'Invalid request' });
+            if (deleteUser.rowCount == 1) {
+                return res.status(400).json({ code: 400, message: 'Invalid request' });
             }
         }
         return res.status(201).json({ code: 201, message: 'user add successfully, please confirm your mail' });
@@ -77,8 +77,28 @@ const addUser = async (req, res) => {
 
 }
 
-const activateAccount = (req, res) => {
-    
+const activateAccount = async (req, res) => {
+    const activeAccount = util.promisify(activeAccountByActivationKey);
+    const activate = await activeAccount(req.params.activationKey).then(data => data).catch(err => err);
+    if (activate.rowCount) {
+        console.log(activate);
+        return res.status(200).json({ code: 200, message: 'your account is activated' });
+    }
+    else {
+        console.log(activate);
+        return res.status()
+    }
+}
+
+const activeAccountByActivationKey = (activationKey, callback) => {
+    const request = {
+        name: 'active account by activation key',
+        text: 'UPDATE users SET active = true WHERE activationkey = $1',
+        values: [activationKey]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
 }
 
 const getUserByMail = (mail, callback) => {
@@ -91,7 +111,6 @@ const getUserByMail = (mail, callback) => {
     pool.query(request)
         .then(res => callback(null, res))
         .catch(err => callback(err, null))
-
 }
 
 const getUserByUsername = (username, callback) => {

@@ -5,6 +5,7 @@ const userSignup =  (req, res) => {
 };
 
 const activateAccount = (req, res) => {
+    console.log('controller activateAccount ')
     userModel.activateAccount(req, res);
 }
 

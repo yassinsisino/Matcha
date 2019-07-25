@@ -7,7 +7,7 @@ const userController = require('../controllers/userController');
 userRoute.route('/signup')
 .post(userController.userSignup);
 
-userRoute.route('/activation/:activtionKey')
+userRoute.route('/activation/:activationKey')
 .get(userController.activateAccount);
 
 
