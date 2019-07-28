@@ -1,25 +1,27 @@
 const util = require('util');
 const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
+const htmlSpecialChars = require('htmlspecialchars');
 
 const pool = require('../database/index');
 const mailer = require('../utils/mailer');
 
+const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+const regex_username = /^[a-zA-Z0-9_.-]*$/;
+const regex_name = /^[a-zA-Z_.-]*$/;
+const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
+const saltRound = 10;
+
 const addUser = async (req, res) => {
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const username = req.body.username;
-    const mail = req.body.mail;
-    const password = req.body.password;
-    const saltRound = 10;
+    const firstName = htmlSpecialChars(req.body.firstName);
+    const lastName = htmlSpecialChars(req.body.lastName);
+    const username = htmlSpecialChars(req.body.username);
+    const mail = htmlSpecialChars(req.body.mail);
+    const password = htmlSpecialChars(req.body.password);
 
-    const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-    const regex_username = /^[a-zA-Z0-9_.-]*$/;
-    const regex_name = /^[a-zA-Z_.-]*$/;
-    const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
-
-
-    if (!firstName.match(regex_name) || (firstName.length < 2 && firstName.length > 20)) {
+    if (!firstName || !lastName || !username || !mail || !password)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
+    else if (!firstName.match(regex_name) || (firstName.length < 2 && firstName.length > 20)) {
         return res.status(400).json({ code: 400, message: 'Invalid Firstname ' });
     }
     else if (!lastName.match(regex_name) || (lastName.length < 2 && lastName.length > 20)) {
@@ -48,7 +50,7 @@ const addUser = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
     const passwordCrypt = await bcrypt.hash(password, saltRound).then(hash => hash).catch(err => console.log('error', err));
     const activationKey = uniqid(Date.now() + '-');
-    const activationUrl = 'http://localhost:3000/api/user/active/?activationKey=' + activationKey;
+    const activationUrl = 'http://localhost:3000/api/user/active/' + activationKey;
 
     const request = {
         name: 'Add new user',
@@ -81,15 +83,33 @@ const activateAccount = async (req, res) => {
     const activeAccount = util.promisify(activeAccountByActivationKey);
     const activate = await activeAccount(req.params.activationKey).then(data => data).catch(err => err);
     if (activate.rowCount) {
-        console.log(activate);
         return res.status(200).json({ code: 200, message: 'your account is activated' });
     }
     else {
-        console.log(activate);
-        return res.status()
+        return res.status(400).json({ code: 400, message: 'Invalid request' })
     }
 }
 
+const login = async (req, res) => {
+    const mail = htmlSpecialChars(req.body.mail);
+    const password = htmlSpecialChars(req.body.password);
+    if (!mail || !password)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
+    else if (!mail.match(regex_mail) || (mail.length < 5 && mail.length > 60))
+        return res.status(400).json({ code: 400, message: 'Invalid Mail' });
+    else if (!password.match(regex_password) || password.length > 25)
+        return res.status(400).json({ code: 400, message: 'Invalid Password' });
+    const getUser = util.promisify(getUserByMail);
+    const user = await getUser(req.body.mail);
+    console.log(user.rows);
+
+}
+
+
+// 
+// 
+// 
+// 
 const activeAccountByActivationKey = (activationKey, callback) => {
     const request = {
         name: 'active account by activation key',
@@ -127,4 +147,5 @@ const getUserByUsername = (username, callback) => {
 module.exports = {
     addUser,
     activateAccount,
+    login,
 }

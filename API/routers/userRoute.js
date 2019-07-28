@@ -10,5 +10,8 @@ userRoute.route('/signup')
 userRoute.route('/activation/:activationKey')
 .get(userController.activateAccount);
 
+userRoute.route('/login')
+.post(userController.userLogin)
+
 
 module.exports  = userRoute;
