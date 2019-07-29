@@ -112,9 +112,7 @@ const login = async (req, res) => {
     return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
 }
 // 
-// 
-// 
-// 
+
 const activeAccountByActivationKey = (activationKey, callback) => {
     const request = {
         name: 'active account by activation key',
