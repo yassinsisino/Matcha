@@ -111,7 +111,6 @@ const login = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Error to connexion'});
     return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
 }
-
 // 
 // 
 // 
