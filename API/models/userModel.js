@@ -5,6 +5,7 @@ const htmlSpecialChars = require('htmlspecialchars');
 
 const pool = require('../database/index');
 const mailer = require('../utils/mailer');
+const jwt = require('../utils/jwt');
 
 const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
@@ -100,11 +101,16 @@ const login = async (req, res) => {
     else if (!password.match(regex_password) || password.length > 25)
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     const getUser = util.promisify(getUserByMail);
-    const user = await getUser(req.body.mail);
-    console.log(user.rows);
-
+    const user = await getUser(mail).then(data => data).catch(err => err);
+    const passwordMatch = await bcrypt.compare(password, user.password).catch(err => err)
+    if (!passwordMatch)
+        return res.status(400).json({ code: 400, message: 'Wrong password'});
+    const getToken = util.promisify(jwt.getToken);
+    const token = await getToken({ idUser: user.iduser, mailUser: user.mail}).then(data => data).catch(err => err);
+    if (!token)
+        return res.status(400).json({ code: 400, message: 'Error to connexion'});
+    return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
 }
-
 
 // 
 // 
@@ -129,7 +135,7 @@ const getUserByMail = (mail, callback) => {
         values: [mail]
     }
     pool.query(request)
-        .then(res => callback(null, res))
+        .then(res => callback(null, res.rows[0]))
         .catch(err => callback(err, null))
 }
 
