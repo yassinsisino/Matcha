@@ -106,12 +106,12 @@ const login = async (req, res) => {
     if (!passwordMatch)
         return res.status(400).json({ code: 400, message: 'Wrong password'});
     const getToken = util.promisify(jwt.getToken);
-    const token = await getToken({ idUser: user.iduser, mailUser: user.mail}).then(data => data).catch(err => err);
+    const token = await getToken({ idUser: user.iduser, username: user.username}).then(data => data).catch(err => err);
     if (!token)
         return res.status(400).json({ code: 400, message: 'Error to connexion'});
     return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
 }
-// 
+//
 
 const activeAccountByActivationKey = (activationKey, callback) => {
     const request = {

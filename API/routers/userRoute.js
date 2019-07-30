@@ -2,7 +2,7 @@ const express = require('express');
 
 const userRoute = express.Router();
 const userController = require('../controllers/userController');
-
+const login = require('../utils/jwt');
 
 userRoute.route('/signup')
 .post(userController.userSignup);
@@ -12,6 +12,10 @@ userRoute.route('/activation/:activationKey')
 
 userRoute.route('/login')
 .post(userController.userLogin)
+
+userRoute.route('/')
+.all(login.checkToken)
+
 
 
 module.exports  = userRoute;

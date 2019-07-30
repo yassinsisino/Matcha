@@ -14,6 +14,18 @@ const getToken = (payload, callback) => {
     })
 }
 
+const checkToken = (req, res, next) => {
+    const token  = req.headers.authorization;
+    jwt.verify(token, privateKey, (err, decode) => {
+        if (err)
+            return res.status(400).json({ code: 400, message: 'Invalide Token'})
+        
+        console.log('token valide');
+        next();
+    })
+} 
+
 module.exports = {
     getToken,
+    checkToken,
 }
