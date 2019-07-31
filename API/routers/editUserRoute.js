@@ -1,11 +1,14 @@
 const express = require('express');
-const editUserModel = require('../models/editUserModel');
 
 const editUserRoute = express.Router();
+const editUserController = require('../controllers/editUserController');
+const jwt = require('../utils/jwt');
+
+
+editUserRoute.route('/')
+.all(jwt.checkToken);
 
 editUserRoute.route('/username')
-.put(editUserModel.editUsername);
+.put(editUserController.editUsername);
 
-module.exports = {
-    editUserRoute,
-}
+module.exports = editUserRoute;
