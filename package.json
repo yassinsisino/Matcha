@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/yassinsisino/Matcha#readme",
   "devDependencies": {
+    "eslint": "^6.1.0",
     "nodemon": "^1.19.1"
   }
 }
