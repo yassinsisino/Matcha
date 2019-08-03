@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-server": "nodemon API/app.js"
+    "start-server": "nodemon API/app.js",
+    "install-server": "cd API && npm install",
+    "install-client": "cd client && npm install",
+    "install": "npm install"
   },
   "repository": {
     "type": "git",
