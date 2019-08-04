@@ -16,12 +16,13 @@ const getToken = (payload, callback) => {
 
 const checkToken = (req, res, next) => {
     const token  = req.headers.authorization;
+    if (token === undefined)
+        return res.status(401).json({ code: 401 , message: 'Authentification required'});
     jwt.verify(token, privateKey, (err, decode) => {
         if (err){
-            console.log(err);
-            return res.status(400).json({ code: 400, message: 'Invalide Token'})
+            console.log(err.message);
+            return res.status(400).json({ code: 400, message: 'Invalide token'})
         }
-        console.log('token valide');
         next();
     })
 }

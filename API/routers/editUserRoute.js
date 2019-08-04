@@ -5,8 +5,7 @@ const editUserController = require('../controllers/editUserController');
 const jwt = require('../utils/jwt');
 
 
-editUserRoute.route('/')
-.all(jwt.checkToken);
+editUserRoute.use('/', jwt.checkToken);
 
 editUserRoute.route('/username')
 .put(editUserController.editUsername);

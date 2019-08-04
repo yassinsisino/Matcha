@@ -11,14 +11,4 @@ const pool = new Pool({
     max:20,
 });
 
-// const query = (req, res) => {
-//     pool.connect()
-//         .then(client => {
-//             client.query(req)
-//             .then(res)
-//             .catch(err => { console.log(err) })
-//             .then(() => client.release())
-//         })
-// }
-
 module.exports = pool;

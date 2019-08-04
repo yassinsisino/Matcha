@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
 const htmlSpecialChars = require('htmlspecialchars');
 
-const pool = require('../database/index');
+const model = require('./userAction');
 const mailer = require('../utils/mailer');
 const jwt = require('../utils/jwt');
 
@@ -11,7 +11,6 @@ const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
 const regex_name = /^[a-zA-Z_.-]*$/;
 const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
-const saltRound = 10;
 
 const addUser = async (req, res) => {
     const firstName = htmlSpecialChars(req.body.firstName);
@@ -37,31 +36,27 @@ const addUser = async (req, res) => {
     else if (!password.match(regex_password) || password.length > 25) {
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
-    const exist_mail = util.promisify(getUserByMail);
+    const exist_mail = util.promisify(model.getUserByMail);
     const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
     if (checkMail.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkMail.rowCount !== 0)
         return res.status(400).json({ code: 400, message: 'Mail already exist' });
-    const exist_username = util.promisify(getUserByUsername);
+    const exist_username = util.promisify(model.getUserByUsername);
     const checkUsername = await exist_username(username).then(result => result).catch(err => err);
     if (checkUsername.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkUsername.rowCount !== 0)
         return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
-    const passwordCrypt = await bcrypt.hash(password, saltRound).then(hash => hash).catch(err => console.log('error', err));
-    const activationKey = uniqid(Date.now() + '-');
+    const activationKey = uniqid(Date.now() + '-');    
     const activationUrl = 'http://localhost:3000/api/user/active/' + activationKey;
-
-    const request = {
-        name: 'Add new user',
-        text: 'INSERT INTO users(firstname, lastname, username, mail, password, activationkey) VALUES($1, $2, $3, $4, $5, $6)',
-        values: [firstName, lastName, username, mail, passwordCrypt, activationKey]
-    }
-    const requestStatus = await pool.query(request).then(data => data).catch(err => err)
+    // add user
+    const adduser = util.promisify(model.AddNewUser);
+    const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
     if (requestStatus.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (requestStatus.rowCount !== 0) {
+        // send mail
         const mailler = util.promisify(mailer.sendInscriptionMail);
         const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
         if (!sendMail.accepted) {
@@ -81,7 +76,7 @@ const addUser = async (req, res) => {
 }
 
 const activateAccount = async (req, res) => {
-    const activeAccount = util.promisify(activeAccountByActivationKey);
+    const activeAccount = util.promisify(model.activeAccountByActivationKey);
     const activate = await activeAccount(req.params.activationKey).then(data => data).catch(err => err);
     if (activate.rowCount) {
         return res.status(200).json({ code: 200, message: 'your account is activated' });
@@ -100,7 +95,7 @@ const login = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid Mail' });
     else if (!password.match(regex_password) || password.length > 25)
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
-    const getUser = util.promisify(getUserByMail);
+    const getUser = util.promisify(model.getUserByMail);
     const user = await getUser(mail).then(data => data).catch(err => err);
     const passwordMatch = await bcrypt.compare(password, user.password).catch(err => err)
     if (!passwordMatch)
@@ -113,39 +108,6 @@ const login = async (req, res) => {
 }
 //
 
-const activeAccountByActivationKey = (activationKey, callback) => {
-    const request = {
-        name: 'active account by activation key',
-        text: 'UPDATE users SET active = true WHERE activationkey = $1',
-        values: [activationKey]
-    }
-    pool.query(request)
-        .then(res => callback(null, res))
-        .catch(err => callback(err, null))
-}
-
-const getUserByMail = (mail, callback) => {
-
-    const request = {
-        name: 'get user by mail',
-        text: 'SELECT * FROM users WHERE mail = $1',
-        values: [mail]
-    }
-    pool.query(request)
-        .then(res => callback(null, res.rows[0]))
-        .catch(err => callback(err, null))
-}
-
-const getUserByUsername = (username, callback) => {
-    const request = {
-        name: 'get user by username',
-        text: 'SELECT * FROM users WHERE username = $1',
-        values: [username]
-    }
-    pool.query(request)
-        .then(res => callback(null, res))
-        .catch(err => callback(err, null))
-}
 
 module.exports = {
     addUser,
