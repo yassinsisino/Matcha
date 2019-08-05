@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const uniqid = require('uniqid');
 
 const pool = require('../database/index');
 
@@ -37,7 +36,7 @@ const getUserByUsername = (username, callback) => {
         .catch(err => callback(err, null))
 }
 
-const AddNewUser = async (firstName, lastName, username, mail, password, activationKey, callback) => {
+const addNewUser = async (firstName, lastName, username, mail, password, activationKey, callback) => {
     const saltRound = 10;
     const passwordCrypt = await bcrypt.hash(password, saltRound).then(hash => hash).catch(err => console.log('error', err));
     const request = {
@@ -50,9 +49,59 @@ const AddNewUser = async (firstName, lastName, username, mail, password, activat
         .catch(res => callbacl(res, null))
 }
 
+const deleteUserByMail =  (mail, callback) => {
+    const request = {
+        name: 'Delete user by mail',
+        text: 'DELETE FROM users WHERE mail = $1',
+        values: [mail]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(res => callback(res, null))
+}
+
+const updateUsername = (iduser, username, callback) => {
+    const request = {
+        name: 'Update username',
+        text: 'UPDATE users SET username = $1 WHERE iduser = $2',
+        values: [username, iduser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
+const updateFirstname  = (idUser, firstname, callback) => {
+    const request = {
+        name: 'update firstname',
+        text: 'UPDATE users SET firstname = $1 WHERE iduser = $2',
+        values: [firstname, idUser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
+const updateLastname  = (idUser, lastname, callback) => {
+    const request = {
+        name: 'update lastname',
+        text: 'UPDATE users SET lastname = $1 WHERE iduser = $2',
+        values: [lastname, idUser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
+
+
 module.exports = {
     activeAccountByActivationKey,
     getUserByMail,
     getUserByUsername,
-    AddNewUser,
+    addNewUser,
+    deleteUserByMail,
+    updateUsername,
+    updateFirstname,
+    updateLastname,
 }

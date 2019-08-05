@@ -12,6 +12,13 @@ const regex_username = /^[a-zA-Z0-9_.-]*$/;
 const regex_name = /^[a-zA-Z_.-]*$/;
 const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
 
+// #########################################
+// add new user:
+//  1- check input data (empty, htmlspecialchars,..)
+//  2- check if mail or username does existe
+//  3- add user in databases and send confirmation mail
+// #########################################
+
 const addUser = async (req, res) => {
     const firstName = htmlSpecialChars(req.body.firstName);
     const lastName = htmlSpecialChars(req.body.lastName);
@@ -51,21 +58,17 @@ const addUser = async (req, res) => {
     const activationKey = uniqid(Date.now() + '-');    
     const activationUrl = 'http://localhost:3000/api/user/active/' + activationKey;
     // add user
-    const adduser = util.promisify(model.AddNewUser);
+    const adduser = util.promisify(model.addNewUser);
     const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
     if (requestStatus.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (requestStatus.rowCount !== 0) {
-        // send mail
+    // send mail
         const mailler = util.promisify(mailer.sendInscriptionMail);
         const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
         if (!sendMail.accepted) {
-            const deleteRequest = {
-                name: 'Delete user by mail',
-                text: 'DELETE FROM users WHERE mail = $1',
-                values: [mail]
-            }
-            const deleteUser = await pool.query(deleteRequest).then(data => data).catch(err => err);
+            const deleteRequest = util.promisify(model.deleteUserByMail);
+            const deleteUser = await deleteRequest(mail).then(data => data).catch(err => err);
             if (deleteUser.rowCount == 1) {
                 return res.status(400).json({ code: 400, message: 'Invalid request' });
             }
@@ -74,6 +77,11 @@ const addUser = async (req, res) => {
     }
 
 }
+
+
+// #########################################
+// activate user account
+// #########################################
 
 const activateAccount = async (req, res) => {
     const activeAccount = util.promisify(model.activeAccountByActivationKey);
@@ -85,6 +93,11 @@ const activateAccount = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid request' })
     }
 }
+
+
+// #########################################
+// Login user use token to authentification
+// #########################################
 
 const login = async (req, res) => {
     const mail = htmlSpecialChars(req.body.mail);
@@ -106,8 +119,9 @@ const login = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Error to connexion'});
     return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
 }
-//
 
+// #########################################
+// #########################################
 
 module.exports = {
     addUser,
