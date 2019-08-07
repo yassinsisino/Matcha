@@ -94,7 +94,6 @@ const updateLastname  = (idUser, lastname, callback) => {
 }
 
 
-
 module.exports = {
     activeAccountByActivationKey,
     getUserByMail,
