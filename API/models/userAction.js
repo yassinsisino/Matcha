@@ -93,6 +93,39 @@ const updateLastname  = (idUser, lastname, callback) => {
         .catch(err => callback(err, null))
 }
 
+const updateDateOfBirth = (idUser, dateOfBirth, callback) => {
+    const request = {
+        name: 'update date of birth',
+        text: 'UPDATE users SET dateofbirth = $1 WHERE iduser = $2',
+        values: [dateOfBirth, idUser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
+const updateBio = (idUser, bio, callback) => {
+    const request = {
+        name: 'update biography',
+        text: 'UPDATE users SET bio = $1 WHERE iduser = $2',
+        values: [bio, idUser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
+const updateGender = (idUser, gender, callback) => {
+    const request ={
+        name: 'update gender',
+        text: 'UPDATE users SET gender = $1 WHERE iduser = $2',
+        values: [gender, idUser]
+    }
+    pool.query(request)
+        .then(res => callback(null, res))
+        .catch(err => callback(err, null))
+}
+
 
 module.exports = {
     activeAccountByActivationKey,
@@ -103,4 +136,7 @@ module.exports = {
     updateUsername,
     updateFirstname,
     updateLastname,
+    updateDateOfBirth,
+    updateBio,
+    updateGender,
 }

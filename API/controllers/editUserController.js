@@ -16,9 +16,19 @@ const editBirthDate = (req, res) => {
     editUserModel.editBirthDate(req, res);
 }
 
+const editBio = (req, res) => {
+    editUserModel.editBio(req, res);
+}
+
+const editGender = (req, res) => {
+    editUserModel.editGender(req, res);
+}
+
 module.exports = {
     editUsername,
     editFirstname,
     editLastname,
     editBirthDate,
+    editBio,
+    editGender,
 }

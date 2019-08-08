@@ -66,7 +66,7 @@ const editLastname = async (req, res) => {
     return res.status(200).json({ code:200 , message: 'Lastname updated'});
 }
 const calculeAge = (birthDate) => {
-    const today = Date.now();
+    const today = new Date()
     const todayYear = today.getFullYear();
     const todayMonth = today.getMonth() + 1;
     const todayDate = today.getDate();
@@ -74,9 +74,10 @@ const calculeAge = (birthDate) => {
     const year = dateOfBirth[0];
     const month = dateOfBirth[1];
     const date = dateOfBirth[2];
-    console.log ('today ', todayYear,' - ', todayMonth, ' - ', todayDate);
-    console.log ('birthday ', year,' - ', month, ' - ', date);
-
+    let age = todayYear - year;
+    if (todayMonth < month || (todayMonth == month && todayDate < date))
+        age--;
+    return (age);
 }
 
 const editBirthDate = async (req, res) => {
@@ -87,9 +88,49 @@ const editBirthDate = async (req, res) => {
     if (dateOfBirth == undefined || !dateOfBirth)
         return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
     else if (!dateOfBirth.match(regex_date))
-        return res.status(400).json({ code: 400, message: 'Invalide date'})
-    
-    
+        return res.status(400).json({ code: 400, message: 'Invalide date'});
+    const age = calculeAge(dateOfBirth);
+    if (age < 0)
+        return res.status(400).json({ code: 400, message: 'Invalide date'});
+    else if (age < 18)
+        return res.status(400).json({ code: 400, message: 'Site prohibited to the minor'});
+    const updateDateOfBirth = util.promisify(model.updateDateOfBirth);
+    const update = await updateDateOfBirth(idUser, dateOfBirth).then(data => data).catch(err => err);
+    if (update.rowCount == 0)
+        return res.status(400).json({ code: 400, message: 'Date of birth not updated'});
+    return res.status(200).json({ code: 200, message: 'Date of birth updated'});
+}
+
+const editBio = async (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const bio = htmlSpecialChars(req.body.bio).trim();
+    if (!bio || bio == undefined)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+    else if (bio.length < 20 || bio.length > 450)
+        return res.status(400).json({ code: 400, message: 'Invalide bio, the biography must contain between 20 and 450 characters'});
+    const updateBio = util.promisify(model.updateBio);
+    const update = await updateBio(idUser, bio).then(data => data).catch(err => err);
+    if (update.rowCount == 0)
+        return res.status(400).json({ code: 400, message: 'Biography not updated'});
+    return res.status(200).json({ code: 200, message: 'Biography updated'});
+}
+
+const editGender = async (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const gender = htmlSpecialChars(req.body.gender).toUpperCase();
+    console.log(typeof gender);
+    if (gender == undefined || !gender)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+    else if (!(gender == 'W' || gender == "M" || gender == 'O'))
+        return res.status(400).json({ code: 400, message: 'Invalide gender'});
+    const updateGender = util.promisify(model.updateGender);
+    const update = await updateGender(idUser, gender);
+    console.log(update.rowCount);
+
 }
 
 
@@ -98,4 +139,6 @@ module.exports = {
     editFirstname,
     editLastname,
     editBirthDate,
+    editBio,
+    editGender,
 }

@@ -10,10 +10,14 @@ editUserRoute.use('/', jwt.checkToken);
 editUserRoute.route('/username')
 .put(editUserController.editUsername);
 editUserRoute.route('/firstname')
-.put(editUserController.editFirstname)
+.put(editUserController.editFirstname);
 editUserRoute.route('/lastname')
-.put(editUserController.editLastname)
+.put(editUserController.editLastname);
 editUserRoute.route('/birth')
-.put(editUserController.editBirthDate)
+.put(editUserController.editBirthDate);
+editUserRoute.route('/bio')
+.put(editUserController.editBio);
+editUserRoute.route('/gender')
+.put(editUserController.editGender);
 
 module.exports = editUserRoute;
