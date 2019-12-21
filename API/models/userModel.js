@@ -44,19 +44,19 @@ const addUser = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
     const exist_mail = util.promisify(model.getUserByMail);
-    const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
-    if (checkMail.name === 'error')
+    const checkMail = await exist_mail(mail).then(result =>result).catch(err => err);
+    if (checkMail && checkMail.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
-    else if (checkMail.rowCount !== 0)
+    else if (checkMail && checkMail.rowCount !== 0)
         return res.status(400).json({ code: 400, message: 'Mail already exist' });
     const exist_username = util.promisify(model.getUserByUsername);
     const checkUsername = await exist_username(username).then(result => result).catch(err => err);
-    if (checkUsername.name === 'error')
+    if (checkUsername && checkUsername.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
-    else if (checkUsername.rowCount !== 0)
+    else if (checkUsername && checkUsername.rowCount !== 0)
         return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
     const activationKey = uniqid(Date.now() + '-');    
-    const activationUrl = 'http://localhost:3000/api/user/active/' + activationKey;
+    const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
     // add user
     const adduser = util.promisify(model.addNewUser);
     const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
@@ -70,7 +70,7 @@ const addUser = async (req, res) => {
             const deleteRequest = util.promisify(model.deleteUserByMail);
             const deleteUser = await deleteRequest(mail).then(data => data).catch(err => err);
             if (deleteUser.rowCount == 1) {
-                return res.status(400).json({ code: 400, message: 'Invalid request' });
+                return res.status(400).json({ code: 400, message: 'Invalid request mail not send' });
             }
         }
         return res.status(201).json({ code: 201, message: 'user add successfully, please confirm your mail' });
