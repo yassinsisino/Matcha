@@ -113,11 +113,13 @@ const login = async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, user.password).catch(err => err)
     if (!passwordMatch)
         return res.status(400).json({ code: 400, message: 'Wrong password'});
+    if (!user.active)
+        return res.status(400).json({ code: 400, message: 'compte non activer'});
     const getToken = util.promisify(jwt.getToken);
     const token = await getToken({ idUser: user.iduser, username: user.username}).then(data => data).catch(err => err);
     if (!token)
         return res.status(400).json({ code: 400, message: 'Error to connexion'});
-    return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
+    return res.status(200).json({ code: 200, message: 'Connexion success', token: token, user: user})
 }
 
 // #########################################
