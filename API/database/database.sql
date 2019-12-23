@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
     mailNotification BOOLEAN DEFAULT 'T',
     activationKey VARCHAR(255),
     restoreKey VARCHAR(255),
-    connexionLog TIMESTAMP,
+    connexionLog TIMESTAMP DEFAULT NOW(),
     location JSON,
     photos JSON
 );

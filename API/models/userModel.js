@@ -6,6 +6,7 @@ const htmlSpecialChars = require('htmlspecialchars');
 const model = require('./userAction');
 const mailer = require('../utils/mailer');
 const jwt = require('../utils/jwt');
+const tagModel = require('./tagModel');
 
 const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
@@ -44,7 +45,7 @@ const addUser = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
     const exist_mail = util.promisify(model.getUserByMail);
-    const checkMail = await exist_mail(mail).then(result =>result).catch(err => err);
+    const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
     if (checkMail && checkMail.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkMail && checkMail.rowCount !== 0)
@@ -55,7 +56,7 @@ const addUser = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkUsername && checkUsername.rowCount !== 0)
         return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
-    const activationKey = uniqid(Date.now() + '-');    
+    const activationKey = uniqid(Date.now() + '-');
     const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
     // add user
     const adduser = util.promisify(model.addNewUser);
@@ -63,7 +64,7 @@ const addUser = async (req, res) => {
     if (requestStatus.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (requestStatus.rowCount !== 0) {
-    // send mail
+        // send mail
         const mailler = util.promisify(mailer.sendInscriptionMail);
         const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
         if (!sendMail.accepted) {
@@ -112,14 +113,33 @@ const login = async (req, res) => {
     const user = await getUser(mail).then(data => data).catch(err => err);
     const passwordMatch = await bcrypt.compare(password, user.password).catch(err => err)
     if (!passwordMatch)
-        return res.status(400).json({ code: 400, message: 'Wrong password'});
-    else if(!user.active)
-        return res.status(400).json({code: 400, message: 'compte not activeted yet'});
+        return res.status(400).json({ code: 400, message: 'Wrong password' });
+    else if (!user.active)
+        return res.status(400).json({ code: 400, message: 'compte not activeted yet' });
     const getToken = util.promisify(jwt.getToken);
-    const token = await getToken({ idUser: user.iduser, username: user.username}).then(data => data).catch(err => err);
+    const token = await getToken({ idUser: user.iduser, username: user.username }).then(data => data).catch(err => err);
     if (!token)
-        return res.status(400).json({ code: 400, message: 'Error to connexion'});
-    return res.status(200).json({ code: 200, message: 'Connexion success', token: token})
+        return res.status(400).json({ code: 400, message: 'Error to connexion' });
+
+    // Get user tag list 
+    const getTags = util.promisify(tagModel.getUserTags);
+    const tags = await getTags(user.iduser);
+
+    return res.status(200).json({
+        code: 200,
+        message: 'Connexion success',
+        firstName: user.firstname,
+        lastName: user.lastname,
+        username: user.username,
+        bio: user.bio,
+        gender: user.gender,
+        orientation: user.orientation,
+        mailNotification: user.mailNotification,
+        photos: user.photos,
+        tags: tags,
+        token: token,
+
+    })
 }
 
 // #########################################

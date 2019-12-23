@@ -14,7 +14,7 @@ userRoute.route('/login')
 .post(userController.userLogin)
 
 userRoute.route('/')
-.all(login.checkToken)
+.get(login.checkToken)
 
 
 
