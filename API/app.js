@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const userRoute = require('./routers/userRoute');
 const editUserRoute = require('./routers/editUserRoute');
 const tagsRoute = require('./routers/tagsRoute');
+const likesRoute = require('./routers/likesRoute')
 
 const whitelist = ['http://localhost:3001'];
 const corsOptions = {
@@ -19,7 +20,8 @@ const corsOptions = {
     } else if (whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(null, true);
+      // callback(new Error('Not allowed by CORS'));
     }
   },
 };
@@ -32,6 +34,7 @@ app.use(express.urlencoded({extended:true}));
 app.use('/api/user', userRoute);
 app.use('/api/edit', editUserRoute);
 app.use('/api/tags', tagsRoute);
+app.use('/api/likes', likesRoute);
 
 app.use('/', (req, res)=>{ res.status(404).json({ code: 404, message: 'Route not found'});})
 
