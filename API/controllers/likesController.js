@@ -85,7 +85,19 @@ const unlikeUser = (req, res) => {
         return res.status(400).json({ code: 400, message: 'You cannot unlike your self' })
 }
 
+const getLike = (req, res) => {
+    const idUser = jwt.decodeToken(req.headers.authorization).idUser;
+    likeModel.getLike(idUser)
+    .then (data => {
+        console.log(data)
+    })
+    .catch (err => {
+        console.log(err)
+    })
+}
+
 module.exports = {
     likeUser,
     unlikeUser,
+    getLike,
 }

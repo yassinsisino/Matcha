@@ -29,8 +29,20 @@ const unlikeUser = (idUser, idUserLiked) => {
     return pool.query(request)
 }
 
+const getLike = (idUser) => {
+    const request = {
+        name: 'get all user like',
+        text: 'SELECT users.iduser, firstname, lastname, username, bio, dateofbirth \
+                FROM users, likes \
+                WHERE likes.iduser = $1 and likes.likediduser = users.iduser ',
+        values: [idUser],
+    }
+    return pool.query(request)
+}
+
 module.exports = {
     isLiked,
     likeUser,
     unlikeUser,
+    getLike,
 }

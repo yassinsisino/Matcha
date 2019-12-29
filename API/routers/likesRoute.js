@@ -15,4 +15,7 @@ likesRoute.route('/like')
 likesRoute.route('/unlike')
     .post(likesController.unlikeUser);
 
+likesRoute.route('/likes')
+    .get(likesController.getLike)
+
 module.exports = likesRoute;
