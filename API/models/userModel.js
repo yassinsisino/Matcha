@@ -109,37 +109,50 @@ const login = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid Mail' });
     else if (!password.match(regex_password) || password.length > 25)
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
-    const getUser = util.promisify(model.getUserByMail);
-    const user = await getUser(mail).then(data => data).catch(err => err);
-    const passwordMatch = await bcrypt.compare(password, user.password).catch(err => err)
-    if (!passwordMatch)
-        return res.status(400).json({ code: 400, message: 'Wrong password' });
-    else if (!user.active)
-        return res.status(400).json({ code: 400, message: 'compte not activeted yet' });
-    const getToken = util.promisify(jwt.getToken);
-    const token = await getToken({ idUser: user.iduser, username: user.username }).then(data => data).catch(err => err);
-    if (!token)
-        return res.status(400).json({ code: 400, message: 'Error to connexion' });
+    model.getUserByMail(mail)
+        .then(user => {
+            if (user.rowCount == 0)
+                return res.status(400).json({ code: 400, message: 'Wrong Mail' });
+            bcrypt.compare(password, user.rows[0].password)
+                .then(async (data) => {
+                    if (!data)
+                        return res.status(400).json({ code: 400, message: 'Wrong password' });
+                    if (!user.rows[0].active)
+                        return res.status(400).json({ code: 400, message: 'compte not activeted yet' });
+                    const getToken = util.promisify(jwt.getToken);
+                    const token = await getToken({ idUser: user.rows[0].iduser, username: user.rows[0].username }).then(data => data).catch(err => err);
+                    if (!token)
+                        return res.status(400).json({ code: 400, message: 'Error to connexion' });
 
-    // Get user tag list 
-    const getTags = util.promisify(tagModel.getUserTags);
-    const tags = await getTags(user.iduser);
+                    // Get user tag list 
+                    const getTags = util.promisify(tagModel.getUserTags);
+                    const tags = await getTags(user.iduser);
 
-    return res.status(200).json({
-        code: 200,
-        message: 'Connexion success',
-        firstName: user.firstname,
-        lastName: user.lastname,
-        username: user.username,
-        bio: user.bio,
-        gender: user.gender,
-        orientation: user.orientation,
-        mailNotification: user.mailNotification,
-        photos: user.photos,
-        tags: tags,
-        token: token,
+                    return res.status(200).json({
+                        code: 200,
+                        message: 'Connexion success',
+                        firstName: user.rows[0].firstname,
+                        lastName: user.rows[0].lastname,
+                        username: user.rows[0].username,
+                        bio: user.rows[0].bio,
+                        gender: user.rows[0].gender,
+                        orientation: user.rows[0].orientation,
+                        mailNotification: user.rows[0].mailNotification,
+                        photos: user.rows[0].photos,
+                        tags: tags,
+                        token: token,
+                    })
 
-    })
+                })
+                .catch(err => {
+                    console.log('erreur  bcrypt compare ', err)
+                    return res.status(400).json({ code: 400, message: 'Error to connexion' });
+                })
+        })
+        .catch(err => {
+            console.log('erreur catch get user by email\n', err)
+            return res.status(400).json({ code: 400, message: 'Error to connexion' });
+        })
 }
 
 // #########################################

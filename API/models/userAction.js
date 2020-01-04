@@ -13,16 +13,14 @@ const activeAccountByActivationKey = (activationKey, callback) => {
         .catch(err => callback(err, null))
 }
 
-const getUserByMail = (mail, callback) => {
+const getUserByMail = (mail) => {
 
     const request = {
         name: 'get user by mail',
         text: 'SELECT * FROM users WHERE mail = $1',
         values: [mail]
     }
-    pool.query(request)
-        .then(res => callback(null, res.rows[0]))
-        .catch(err => callback(err, null))
+    return pool.query(request)
 }
 
 const getUserByUsername = (username, callback) => {

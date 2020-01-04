@@ -6,8 +6,7 @@ const login = require('../utils/jwt');
 
 const likesRoute = express.Router();
 
-likesRoute.route('/')
-    .all(login.checkToken)
+likesRoute.use('/', login.checkToken);
 
 likesRoute.route('/like')
     .post(likesController.likeUser);
