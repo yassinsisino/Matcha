@@ -20,7 +20,7 @@ const checkToken = (req, res, next) => {
         return res.status(401).json({ code: 401 , message: 'Authentification required'});
     jwt.verify(token, privateKey, (err, decode) => {
         if (err){
-            console.log(err.message);
+            // console.log(err.message);
             return res.status(400).json({ code: 400, message: 'Invalide token'})
         }
         next();

@@ -13,8 +13,9 @@ userRoute.route('/activation/:activationKey')
 userRoute.route('/login')
 .post(userController.userLogin)
 
+userRoute.use('/', login.checkToken)
 userRoute.route('/')
-.get(login.checkToken)
+.get(userController.getUsers)
 
 
 
