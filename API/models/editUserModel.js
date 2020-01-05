@@ -14,11 +14,11 @@ const editUsername = async (req, res) => {
     const decode = jwt.decodeToken(token);
     // console.log(decode);
     const idUser = decode.idUser;
-    const newUsername =  htmlSpecialChars(req.body.username);
+    const newUsername = htmlSpecialChars(req.body.username);
     const getUserByUsername = util.promisify(model.getUserByUsername);
     const findUser = await getUserByUsername(newUsername).then(data => data).catch(err => err);
     if (newUsername == undefined)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!newUsername.match(regex_username) || (newUsername.length < 2 && newUsername.length > 20))
         return res.status(400).json({ code: 400, message: 'Invalid username' });
     else if (findUser.name === 'error')
@@ -28,8 +28,8 @@ const editUsername = async (req, res) => {
     const updateUsername = util.promisify(model.updateUsername)
     const update = await updateUsername(idUser, newUsername).then(data => data).catch(err => err);
     if (update.rowCount == 0)
-        return res.status(400).json({ code: 400, message: 'Username not updated'});
-    return res.status(200).json({ code: 200, message: 'Username updated'});
+        return res.status(400).json({ code: 400, message: 'Username not updated' });
+    return res.status(200).json({ code: 200, message: 'Username updated' });
 }
 
 const editFirstname = async (req, res) => {
@@ -39,14 +39,14 @@ const editFirstname = async (req, res) => {
     const newFirstname = htmlSpecialChars(req.body.firstname);
 
     if (newFirstname == undefined || !newFirstname)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!newFirstname.match(regex_name) || (newFirstname.length < 2 && newFirstname.length > 20))
-        return res.status(400).json({ code: 400, message: 'Invalide firstname'})
+        return res.status(400).json({ code: 400, message: 'Invalide firstname' })
     const updateFirstname = util.promisify(model.updateFirstname);
     const update = await updateFirstname(idUser, newFirstname).then(data => data).catch(err => err);
     if (update.rowCount == 0)
-        return res.status(400).json({ code: 400, message: 'Firstname not updated'})
-    return res.status(200).json({ code:200 , message: 'Firstname updated'})
+        return res.status(400).json({ code: 400, message: 'Firstname not updated' })
+    return res.status(200).json({ code: 200, message: 'Firstname updated' })
 }
 
 const editLastname = async (req, res) => {
@@ -56,14 +56,14 @@ const editLastname = async (req, res) => {
     const newLastname = htmlSpecialChars(req.body.lastname);
 
     if (newLastname == undefined || !newLastname)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!newLastname.match(regex_name) || newLastname.length < 2 || newLastname.length > 20)
-        return res.status(400).json({ code: 400, message: 'Invalide lastname'});
+        return res.status(400).json({ code: 400, message: 'Invalide lastname' });
     const updateLastname = util.promisify(model.updateLastname);
     const update = await updateLastname(idUser, newLastname).then(data => data).catch(err => err);
     if (update.rowCount == 0)
-        return res.status(400).json({ code: 400, message: 'Lastname not updated'});
-    return res.status(200).json({ code:200 , message: 'Lastname updated'});
+        return res.status(400).json({ code: 400, message: 'Lastname not updated' });
+    return res.status(200).json({ code: 200, message: 'Lastname updated' });
 }
 const calculeAge = (birthDate) => {
     const today = new Date()
@@ -86,19 +86,19 @@ const editBirthDate = async (req, res) => {
     const idUser = decode.idUser;
     const dateOfBirth = htmlSpecialChars(req.body.dateOfBirth);
     if (dateOfBirth == undefined || !dateOfBirth)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!dateOfBirth.match(regex_date))
-        return res.status(400).json({ code: 400, message: 'Invalide date'});
+        return res.status(400).json({ code: 400, message: 'Invalide date' });
     const age = calculeAge(dateOfBirth);
     if (age < 0)
-        return res.status(400).json({ code: 400, message: 'Invalide date'});
+        return res.status(400).json({ code: 400, message: 'Invalide date' });
     else if (age < 18)
-        return res.status(400).json({ code: 400, message: 'Site prohibited to the minor'});
+        return res.status(400).json({ code: 400, message: 'Site prohibited to the minor' });
     const updateDateOfBirth = util.promisify(model.updateDateOfBirth);
     const update = await updateDateOfBirth(idUser, dateOfBirth).then(data => data).catch(err => err);
     if (update.rowCount == 0)
-        return res.status(400).json({ code: 400, message: 'Date of birth not updated'});
-    return res.status(200).json({ code: 200, message: 'Date of birth updated'});
+        return res.status(400).json({ code: 400, message: 'Date of birth not updated' });
+    return res.status(200).json({ code: 200, message: 'Date of birth updated' });
 }
 
 const editBio = async (req, res) => {
@@ -107,14 +107,18 @@ const editBio = async (req, res) => {
     const idUser = decode.idUser;
     const bio = htmlSpecialChars(req.body.bio).trim();
     if (!bio || bio == undefined)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (bio.length < 20 || bio.length > 450)
-        return res.status(400).json({ code: 400, message: 'Invalide bio, the biography must contain between 20 and 450 characters'});
+        return res.status(400).json({ code: 400, message: 'Invalide bio, the biography must contain between 20 and 450 characters' });
     const updateBio = util.promisify(model.updateBio);
+    //util.promisify -> Prend une fonction suivant le style de rappel commun d'erreur d'abord, c'est-à-dire en prenant un (err, value) => ...rappel comme dernier argument, et retourne une version qui renvoie des promesses.
+    //a verifier si verif du meme firsname
     const update = await updateBio(idUser, bio).then(data => data).catch(err => err);
+    // apres MAJ on verifie si prenom dispo dans BDD -> si ok =1 si no = 0.
+
     if (update.rowCount == 0)
-        return res.status(400).json({ code: 400, message: 'Biography not updated'});
-    return res.status(200).json({ code: 200, message: 'Biography updated'});
+        return res.status(400).json({ code: 400, message: 'Biography not updated' });
+    return res.status(200).json({ code: 200, message: 'Biography updated' });
 }
 
 const editGender = async (req, res) => {
@@ -124,9 +128,9 @@ const editGender = async (req, res) => {
     const gender = htmlSpecialChars(req.body.gender).toUpperCase();
     console.log(typeof gender);
     if (gender == undefined || !gender)
-        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty'});
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!(gender == 'W' || gender == "M" || gender == 'O'))
-        return res.status(400).json({ code: 400, message: 'Invalide gender'});
+        return res.status(400).json({ code: 400, message: 'Invalide gender' });
     const updateGender = util.promisify(model.updateGender);
     const update = await updateGender(idUser, gender);
     console.log(update.rowCount);

@@ -79,7 +79,6 @@ const addUser = async (req, res) => {
 
 }
 
-
 // #########################################
 // activate user account
 // #########################################
@@ -88,13 +87,13 @@ const activateAccount = async (req, res) => {
     const activeAccount = util.promisify(model.activeAccountByActivationKey);
     const activate = await activeAccount(req.params.activationKey).then(data => data).catch(err => err);
     if (activate.rowCount) {
-        return res.status(200).json({ code: 200, message: 'your account is activated' });
+        // return res.status(200).json({ code: 200, message: 'your account is activated' });
+        return res.redirect('http://localhost:3001/connexion/' + req.params.activationKey);
     }
     else {
         return res.status(400).json({ code: 400, message: 'Invalid request' })
     }
 }
-
 
 // #########################################
 // Login user use token to authentification
@@ -138,7 +137,7 @@ const login = async (req, res) => {
         photos: user.photos,
         tags: tags,
         token: token,
-
+        userid : user.iduser
     })
 }
 
