@@ -27,8 +27,20 @@ const deleteMatch = (idMatch) => {
     return pool.query(request);ß
 }
 
+const getMatch = (idUser) => {
+    const request = {
+        name: 'get all user like',
+        text: 'SELECT users.iduser, firstname, lastname, username, bio, dateofbirth \
+                FROM users, matches \
+                WHERE (matches.iduser1 = $1 and matches.iduser2 = users.iduser) OR (matches.iduser2 = $1 and matches.iduser1 = users.iduser)',
+        values: [idUser],
+    }
+    return pool.query(request)
+}
+
 module.exports = {
     addMatch,
     isMatched,
     deleteMatch,
+    getMatch,
 }

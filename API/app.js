@@ -11,6 +11,7 @@ const userRoute = require('./routers/userRoute');
 const editUserRoute = require('./routers/editUserRoute');
 const tagsRoute = require('./routers/tagsRoute');
 const likesRoute = require('./routers/likesRoute')
+const matchesRoute = require('./routers/matchRoute')
 
 const whitelist = ['http://localhost:3001'];
 const corsOptions = {
@@ -35,6 +36,7 @@ app.use('/api/user', userRoute);
 app.use('/api/edit', editUserRoute);
 app.use('/api/tags', tagsRoute);
 app.use('/api/likes', likesRoute);
+app.use('/api/matches', matchesRoute);
 
 app.use('/', (req, res)=>{ res.status(404).json({ code: 404, message: 'Route not found'});})
 
