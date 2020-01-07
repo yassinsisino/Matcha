@@ -45,7 +45,9 @@ const addUser = async (req, res) => {
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
     const exist_mail = util.promisify(model.getUserByMail);
+    console.log('AVANT AWAIT EXIST_MAIL DANS USERMODEL.JS');
     const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
+    console.log('APRES AWAIT EXIST_MAIL DANS USERMODEL.JS');
     if (checkMail && checkMail.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
     else if (checkMail && checkMail.rowCount !== 0)
@@ -60,6 +62,7 @@ const addUser = async (req, res) => {
     const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
     // add user
     const adduser = util.promisify(model.addNewUser);
+   
     const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
     if (requestStatus.name === 'error')
         return res.status(400).json({ code: 400, message: 'Invalid request' });
@@ -140,7 +143,7 @@ const login = async (req, res) => {
                         photos: user.rows[0].photos,
                         tags: tags,
                         token: token,
-                        userId : user.userId
+                        userId: user.rows[0].iduser
                     })
 
                 })
