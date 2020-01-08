@@ -13,6 +13,15 @@ const activeAccountByActivationKey = (activationKey, callback) => {
         .catch(err => callback(err, null))
 }
 
+const getUserById = (idUser) => {
+    const request = {
+        name: 'get user by id',
+        text: 'SELECT * FROM users WHERE iduser = $1',
+        values: [idUser]
+    }
+    return pool.query(request)
+}
+
 const getUserByMail = (mail) => {
 
     const request = {
@@ -137,4 +146,5 @@ module.exports = {
     updateDateOfBirth,
     updateBio,
     updateGender,
+    getUserById,
 }

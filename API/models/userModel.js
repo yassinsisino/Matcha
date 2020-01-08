@@ -7,6 +7,8 @@ const model = require('./userAction');
 const mailer = require('../utils/mailer');
 const jwt = require('../utils/jwt');
 const tagModel = require('./tagModel');
+const pool = require('../database/index');
+
 
 const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
@@ -158,6 +160,30 @@ const login = async (req, res) => {
         })
 }
 
+
+// #########################################
+// get list of users recomanded for you
+// #########################################
+
+const getUsers = (idUser, genre, orientation) => {
+    if (genre != 'X')
+        var request = {
+            name: 'get users',
+            text: 'SELECT iduser, firstname, lastname, username, dateofbirth, bio, gender, orientation, score  \
+                    FROM users  WHERE iduser != $1 AND gender = $2 AND orientation = $3',
+            values: [idUser, genre, orientation]
+        }
+    else
+        var request = {
+            name: 'get users',
+            text: 'SELECT iduser, firstname, lastname, username, dateofbirth, bio, gender, orientation, score  \
+                    FROM users  WHERE iduser != $1 AND orientation = $2',
+            values: [idUser, orientation]
+        }
+
+    return pool.query(request)
+}
+
 // #########################################
 // #########################################
 
@@ -165,4 +191,5 @@ module.exports = {
     addUser,
     activateAccount,
     login,
+    getUsers,
 }
