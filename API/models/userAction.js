@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 
 const pool = require('../database/index');
 
+const SALTROUND = 10;
+
 const activeAccountByActivationKey = (activationKey, callback) => {
     const request = {
         name: 'active account by activation key',
@@ -44,8 +46,8 @@ const getUserByUsername = (username, callback) => {
 }
 
 const addNewUser = async (firstName, lastName, username, mail, password, activationKey, callback) => {
-    const saltRound = 10;
-    const passwordCrypt = await bcrypt.hash(password, saltRound).then(hash => hash).catch(err => console.log('error', err));
+
+    const passwordCrypt = await bcrypt.hash(password, SALTROUND).then(hash => hash).catch(err => console.log('error', err));
     const request = {
         name: 'Add new user',
         text: 'INSERT INTO users(firstname, lastname, username, mail, password, activationkey) VALUES($1, $2, $3, $4, $5, $6)',
@@ -56,7 +58,7 @@ const addNewUser = async (firstName, lastName, username, mail, password, activat
         .catch(res => callbacl(res, null))
 }
 
-const deleteUserByMail =  (mail, callback) => {
+const deleteUserByMail = (mail, callback) => {
     const request = {
         name: 'Delete user by mail',
         text: 'DELETE FROM users WHERE mail = $1',
@@ -78,7 +80,7 @@ const updateUsername = (iduser, username, callback) => {
         .catch(err => callback(err, null))
 }
 
-const updateFirstname  = (idUser, firstname, callback) => {
+const updateFirstname = (idUser, firstname, callback) => {
     const request = {
         name: 'update firstname',
         text: 'UPDATE users SET firstname = $1 WHERE iduser = $2',
@@ -89,7 +91,7 @@ const updateFirstname  = (idUser, firstname, callback) => {
         .catch(err => callback(err, null))
 }
 
-const updateLastname  = (idUser, lastname, callback) => {
+const updateLastname = (idUser, lastname, callback) => {
     const request = {
         name: 'update lastname',
         text: 'UPDATE users SET lastname = $1 WHERE iduser = $2',
@@ -123,7 +125,7 @@ const updateBio = (idUser, bio, callback) => {
 }
 
 const updateGender = (idUser, gender, callback) => {
-    const request ={
+    const request = {
         name: 'update gender',
         text: 'UPDATE users SET gender = $1 WHERE iduser = $2',
         values: [gender, idUser]
@@ -131,6 +133,16 @@ const updateGender = (idUser, gender, callback) => {
     pool.query(request)
         .then(res => callback(null, res))
         .catch(err => callback(err, null))
+}
+
+const updatePassword = async (idUser, password) => {
+    const passwordCrypt = await bcrypt.hash(password, SALTROUND).then(hash => hash).catch(err => console.log('error', err));
+    const request = {
+        name: 'update password',
+        text: 'UPDATE users SET password = $1 WHERE iduser = $2',
+        values: [passwordCrypt, idUser]
+    }
+    return pool.query(request);
 }
 
 
@@ -147,4 +159,5 @@ module.exports = {
     updateBio,
     updateGender,
     getUserById,
+    updatePassword,
 }

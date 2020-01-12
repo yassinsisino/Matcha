@@ -46,42 +46,42 @@ const addUser = async (req, res) => {
     else if (!password.match(regex_password) || password.length > 25) {
         return res.status(400).json({ code: 400, message: 'Invalid Password' });
     }
-    const exist_mail = util.promisify(model.getUserByMail);
-    console.log('AVANT AWAIT EXIST_MAIL DANS USERMODEL.JS');
-    const checkMail = await exist_mail(mail).then(result => result).catch(err => err);
-    console.log('APRES AWAIT EXIST_MAIL DANS USERMODEL.JS');
-    if (checkMail && checkMail.name === 'error')
-        return res.status(400).json({ code: 400, message: 'Invalid request' });
-    else if (checkMail && checkMail.rowCount !== 0)
-        return res.status(400).json({ code: 400, message: 'Mail already exist' });
-    const exist_username = util.promisify(model.getUserByUsername);
-    const checkUsername = await exist_username(username).then(result => result).catch(err => err);
-    if (checkUsername && checkUsername.name === 'error')
-        return res.status(400).json({ code: 400, message: 'Invalid request' });
-    else if (checkUsername && checkUsername.rowCount !== 0)
-        return res.status(400).json({ code: 400, message: 'Usernamess already exist' });
-    const activationKey = uniqid(Date.now() + '-');
-    const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
-    // add user
-    const adduser = util.promisify(model.addNewUser);
-   
-    const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
-    if (requestStatus.name === 'error')
-        return res.status(400).json({ code: 400, message: 'Invalid request' });
-    else if (requestStatus.rowCount !== 0) {
-        // send mail
-        const mailler = util.promisify(mailer.sendInscriptionMail);
-        const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
-        if (!sendMail.accepted) {
-            const deleteRequest = util.promisify(model.deleteUserByMail);
-            const deleteUser = await deleteRequest(mail).then(data => data).catch(err => err);
-            if (deleteUser.rowCount == 1) {
-                return res.status(400).json({ code: 400, message: 'Invalid request mail not send' });
-            }
-        }
-        return res.status(201).json({ code: 201, message: 'user add successfully, please confirm your mail' });
-    }
+    model.getUserByMail(mail)
+        .then(async (data) => {
+            if (data.rowCount !== 0)
+                return res.status(400).json({ code: 400, message: 'Mail already exist' });
+            const exist_username = util.promisify(model.getUserByUsername);
+            const checkUsername = await exist_username(username).then(result => result).catch(err => err);
+            if (checkUsername && checkUsername.name === 'error')
+                return res.status(400).json({ code: 400, message: 'Invalid request' });
+            else if (checkUsername && checkUsername.rowCount !== 0)
+                return res.status(400).json({ code: 400, message: 'Usernames already exist' });
+            const activationKey = uniqid(Date.now() + '-');
+            const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
+            // add user
+            const adduser = util.promisify(model.addNewUser);
 
+            const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
+            if (requestStatus.name === 'error')
+                return res.status(400).json({ code: 400, message: 'Invalid request' });
+            else if (requestStatus.rowCount !== 0) {
+                // send mail
+                const mailler = util.promisify(mailer.sendInscriptionMail);
+                const sendMail = await mailler(mail, activationUrl, username).then(data => data).catch(err => err);
+                if (!sendMail.accepted) {
+                    const deleteRequest = util.promisify(model.deleteUserByMail);
+                    const deleteUser = await deleteRequest(mail).then(data => data).catch(err => err);
+                    if (deleteUser.rowCount == 1) {
+                        return res.status(400).json({ code: 400, message: 'Invalid request mail not send' });
+                    }
+                }
+                return res.status(201).json({ code: 201, message: 'user add successfully, please confirm your mail' });
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            return res.status(400).json({ code: 400, message: 'Invalid request' });
+        })
 }
 
 // #########################################

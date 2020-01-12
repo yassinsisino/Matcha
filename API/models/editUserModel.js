@@ -7,6 +7,8 @@ const model = require('./userAction');
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
 const regex_name = /^[a-zA-Z_.-]*$/;
 const regex_date = /^[0-9]{4}[-](([0]?[1-9])|([1][0-2]))[-](([0]?[1-9])|([1-2][0-9])|([3][0-1]))$/;
+const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
+
 
 
 const editUsername = async (req, res) => {
@@ -137,6 +139,26 @@ const editGender = async (req, res) => {
 
 }
 
+const editPassword = (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const password = htmlSpecialChars(req.body.password)
+    if (!password.match(regex_password) || password.length > 25) {
+        return res.status(400).json({ code: 400, message: 'Invalid Password' });
+    }
+    model.updatePassword(idUser, password)
+        .then(data => {
+            if (data.rowCount !== 0)
+                return res.status(201).json({ code: 201, message: 'password updated' })
+            else
+                return res.status(400).json({ code: 400, message: 'password not updated' })
+        })
+        .catch(err => {
+            console.log(err)
+            return res.status(400).json({ code: 400, message: 'Invalid request' });
+        })
+}
 
 module.exports = {
     editUsername,
@@ -145,4 +167,5 @@ module.exports = {
     editBirthDate,
     editBio,
     editGender,
+    editPassword,
 }

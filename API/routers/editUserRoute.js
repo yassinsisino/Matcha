@@ -18,5 +18,7 @@ editUserRoute.route('/bio')
 .put(editUserController.editBio);
 editUserRoute.route('/gender')
 .put(editUserController.editGender);
+editUserRoute.route('/password')
+.put(editUserController.editPassword);
 
 module.exports = editUserRoute;
