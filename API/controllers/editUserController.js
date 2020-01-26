@@ -28,6 +28,14 @@ const editPassword = (req, res) => {
     editUserModel.editPassword(req, res);
 }
 
+const editOrientation = (req, res) => {
+    editUserModel.editOrientation(req, res);
+}
+
+const editMail = (req, res) => {
+    editUserModel.editMail(req, res);
+}
+
 module.exports = {
     editUsername,
     editFirstname,
@@ -36,4 +44,6 @@ module.exports = {
     editBio,
     editGender,
     editPassword,
+    editOrientation,
+    editMail,
 }

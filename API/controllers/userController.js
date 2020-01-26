@@ -1,6 +1,8 @@
 const userModel = require('../models/userModel');
 const userAction = require('../models/userAction');
 const jwt = require('../utils/jwt');
+const htmlSpecialChars = require('htmlspecialchars');
+
 
 const userSignup = (req, res) => {
     userModel.addUser(req, res);
@@ -26,7 +28,7 @@ const getUsers = (req, res) => {
             // console.log("###############################", user.rows[0])
             if (!user.rows[0].active)
                 return res.status(400).json({ code: 400, message: 'user not active' });
-            console.log(user.rows[0].gender,user.rows[0].orientation)
+            console.log(user.rows[0].gender, user.rows[0].orientation)
             if (user.rows[0].gender == 'M' && user.rows[0].orientation == 'M') {
                 genre = 'M';
                 orientation = 'M'
@@ -62,7 +64,7 @@ const getUsers = (req, res) => {
                         return res.status(200).json({ code: 200, users: [] })
 
                     console.log(data.rows[0])
-                    return res.status(200).json({ code: 200, users: data.rows})
+                    return res.status(200).json({ code: 200, users: data.rows })
                 })
                 .catch(err => { console.log(err) })
         })
@@ -72,9 +74,44 @@ const getUsers = (req, res) => {
         })
 }
 
+
+const getUser = (req, res) => {
+    const token = req.headers.authorization;
+    const idUser = jwt.decodeToken(token).idUser;
+    const id = htmlSpecialChars(req.params.id);
+    userAction.getUserById(id)
+        .then(data => {
+            if (data.rowCount === 0)
+                return res.status(400).json({ code: 400, message: 'User not found' })
+            else
+                return res.status(200).json({
+                    code: 200, users: {
+                        iduser: data.rows[0].iduser,
+                        firstname: data.rows[0].firstname,
+                        lastname: data.rows[0].lastname,
+                        username: data.rows[0].username,
+                        dateofbirth: data.rows[0].dateofbirth,
+                        bio: data.rows[0].bio,
+                        gender: data.rows[0].gender,
+                        orientation: data.rows[0].orientation,
+                        score: data.rows[0].score,
+                        photo: data.rows[0].photos,
+                    }
+                })
+
+        })
+        .catch(err => {
+            console.log('get user error', err);
+            return res.status(400).json({ code: 400, message: 'Invalid request' });
+        })
+    console.log(id)
+
+}
+
 module.exports = {
     userSignup,
     activateAccount,
     userLogin,
     getUsers,
+    getUser,
 }

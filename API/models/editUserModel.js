@@ -8,7 +8,7 @@ const regex_username = /^[a-zA-Z0-9_.-]*$/;
 const regex_name = /^[a-zA-Z_.-]*$/;
 const regex_date = /^[0-9]{4}[-](([0]?[1-9])|([1][0-2]))[-](([0]?[1-9])|([1-2][0-9])|([3][0-1]))$/;
 const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
-
+const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 
 
 const editUsername = async (req, res) => {
@@ -128,7 +128,6 @@ const editGender = async (req, res) => {
     const decode = jwt.decodeToken(token);
     const idUser = decode.idUser;
     const gender = htmlSpecialChars(req.body.gender).toUpperCase();
-    console.log(typeof gender);
     if (gender == undefined || !gender)
         return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
     else if (!(gender == 'W' || gender == "M" || gender == 'O'))
@@ -160,6 +159,59 @@ const editPassword = (req, res) => {
         })
 }
 
+const editOrientation = (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const orientation = htmlSpecialChars(req.body.orientation).toUpperCase();
+    if (orientation === undefined || !orientation)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
+    else if (!(orientation == 'BI' || orientation == 'M' || orientation == 'W'))
+        return res.status(400).json({ code: 400, message: 'Invalide orientation' });
+    model.updateOrientation(idUser, orientation)
+        .then(data => {
+            if (data.rowCount !== 0)
+                return res.status(201).json({ code: 201, message: 'Orientation updated' })
+            else
+                return res.status(400).json({ code: 400, message: 'Orientation not updated' })
+        })
+        .catch(err => {
+            console.log('edit orientation error', err)
+            return res.status(400).json({ code: 400, message: 'Invalid request' });
+        })
+}
+
+const editMail = (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const mail = htmlSpecialChars(req.body.mail)
+    if (mail === undefined || !mail)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
+    else if (!mail.match(regex_mail) || (mail.length < 5 && mail.length > 60))
+        return res.status(400).json({ code: 400, message: 'Invalid Mail' });
+    model.getUserByMail(mail)
+        .then(data => {
+            if (data.rowCount !== 0 && data.rows[0].iduser !== idUser)
+                return res.status(400).json({ code: 400, message: 'Mail already exist' });
+            else
+                model.updateMail(idUser, mail)
+                    .then(data => {
+                        if (data.rowCount !== 0)
+                            return res.status(201).json({ code: 201, message: 'Mail updated' })
+                        else
+                            return res.status(400).json({ code: 400, message: 'Mail not updated' })
+                    })
+                    .catch(err => {
+                        return res.status(400).json({ code: 400, message: 'Invalid request' });
+                    })
+        })
+        .catch(err => {
+            console.log('edit mail error', err)
+            return res.status(400).json({ code: 400, message: 'Invalid request' });
+        })
+}
+
 module.exports = {
     editUsername,
     editFirstname,
@@ -168,4 +220,6 @@ module.exports = {
     editBio,
     editGender,
     editPassword,
+    editOrientation,
+    editMail,
 }

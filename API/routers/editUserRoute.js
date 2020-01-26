@@ -20,5 +20,9 @@ editUserRoute.route('/gender')
 .put(editUserController.editGender);
 editUserRoute.route('/password')
 .put(editUserController.editPassword);
+editUserRoute.route('/orientation')
+.put(editUserController.editOrientation);
+editUserRoute.route('/mail')
+.put(editUserController.editMail);
 
 module.exports = editUserRoute;

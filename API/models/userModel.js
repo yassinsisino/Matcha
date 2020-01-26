@@ -2,6 +2,8 @@ const util = require('util');
 const bcrypt = require('bcrypt');
 const uniqid = require('uniqid');
 const htmlSpecialChars = require('htmlspecialchars');
+const moment = require('moment');
+const Entities = require('html-entities').AllHtmlEntities;
 
 const model = require('./userAction');
 const mailer = require('../utils/mailer');
@@ -14,6 +16,8 @@ const regex_mail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const regex_username = /^[a-zA-Z0-9_.-]*$/;
 const regex_name = /^[a-zA-Z_.-]*$/;
 const regex_password = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/;
+
+const entities = new Entities();
 
 // #########################################
 // add new user:
@@ -131,15 +135,15 @@ const login = async (req, res) => {
                     // Get user tag list 
                     const getTags = util.promisify(tagModel.getUserTags);
                     const tags = await getTags(user.iduser);
-
                     return res.status(200).json({
                         code: 200,
                         message: 'Connexion success',
                         firstName: user.rows[0].firstname,
                         lastName: user.rows[0].lastname,
                         username: user.rows[0].username,
-                        bio: user.rows[0].bio,
+                        bio: entities.decode(user.rows[0].bio),
                         gender: user.rows[0].gender,
+                        dateOfBirth: moment(user.rows[0].dateofbirth).format('YYYY-MM-DD'),
                         orientation: user.rows[0].orientation,
                         mailNotification: user.rows[0].mailNotification,
                         photos: user.rows[0].photos,

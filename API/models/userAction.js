@@ -145,6 +145,24 @@ const updatePassword = async (idUser, password) => {
     return pool.query(request);
 }
 
+const updateOrientation = (idUser, orientation) => {
+    const request = {
+        name: 'update orientation',
+        text: 'UPDATE users SET orientation = $1 WHERE iduser = $2',
+        values: [orientation, idUser],
+    }
+    return pool.query(request);
+}
+
+const updateMail = (idUser, mail) => {
+    const request = {
+        name: 'update mail',
+        text: 'UPDATE users SET mail = $1 WHERE iduser = $2',
+        values: [mail, idUser],
+    }
+    return pool.query(request);
+}
+
 
 module.exports = {
     activeAccountByActivationKey,
@@ -160,4 +178,6 @@ module.exports = {
     updateGender,
     getUserById,
     updatePassword,
+    updateOrientation,
+    updateMail,
 }

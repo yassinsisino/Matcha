@@ -14,8 +14,12 @@ userRoute.route('/login')
 .post(userController.userLogin)
 
 userRoute.use('/', login.checkToken)
+
 userRoute.route('/')
 .get(userController.getUsers)
+
+userRoute.route('/id/:id')
+.get(userController.getUser)
 
 
 
