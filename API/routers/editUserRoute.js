@@ -24,5 +24,7 @@ editUserRoute.route('/orientation')
 .put(editUserController.editOrientation);
 editUserRoute.route('/mail')
 .put(editUserController.editMail);
+editUserRoute.route('/photos')
+.put(editUserController.editPhotos);
 
 module.exports = editUserRoute;

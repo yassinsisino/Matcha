@@ -45,13 +45,13 @@ const getUserByUsername = (username, callback) => {
         .catch(err => callback(err, null))
 }
 
-const addNewUser = async (firstName, lastName, username, mail, password, activationKey, callback) => {
+const addNewUser = async (firstName, lastName, username, mail, password, activationKey, photos, callback) => {
 
     const passwordCrypt = await bcrypt.hash(password, SALTROUND).then(hash => hash).catch(err => console.log('error', err));
     const request = {
         name: 'Add new user',
-        text: 'INSERT INTO users(firstname, lastname, username, mail, password, activationkey) VALUES($1, $2, $3, $4, $5, $6)',
-        values: [firstName, lastName, username, mail, passwordCrypt, activationKey]
+        text: 'INSERT INTO users(firstname, lastname, username, mail, password, activationkey, photos) VALUES($1, $2, $3, $4, $5, $6, $7)',
+        values: [firstName, lastName, username, mail, passwordCrypt, activationKey, photos]
     }
     pool.query(request)
         .then(res => callback(null, res))
@@ -163,6 +163,14 @@ const updateMail = (idUser, mail) => {
     return pool.query(request);
 }
 
+const updatePhotos = (idUser, photos) => {
+    const request = {
+        name: 'update photo',
+        text: 'UPDATE users SET photos = $1 WHERE iduser = $2',
+        values: [photos, idUser],
+    }
+    return pool.query(request)
+}
 
 module.exports = {
     activeAccountByActivationKey,
@@ -180,4 +188,5 @@ module.exports = {
     updatePassword,
     updateOrientation,
     updateMail,
+    updatePhotos,
 }

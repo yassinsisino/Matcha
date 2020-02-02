@@ -62,10 +62,11 @@ const addUser = async (req, res) => {
                 return res.status(400).json({ code: 400, message: 'Usernames already exist' });
             const activationKey = uniqid(Date.now() + '-');
             const activationUrl = 'http://localhost:3000/api/user/activation/' + activationKey;
+            const photos = {profil: 'img1', img1: '', img2: '', img3: '', img4: '', img5: ''};
             // add user
             const adduser = util.promisify(model.addNewUser);
 
-            const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey).then(data => data).catch(err => err)
+            const requestStatus = await adduser(firstName, lastName, username, mail, password, activationKey, photos).then(data => data).catch(err => err)
             if (requestStatus.name === 'error')
                 return res.status(400).json({ code: 400, message: 'Invalid request' });
             else if (requestStatus.rowCount !== 0) {

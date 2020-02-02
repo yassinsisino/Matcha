@@ -212,6 +212,41 @@ const editMail = (req, res) => {
         })
 }
 
+const editPhotos = (req, res) => {
+    const token = req.headers.authorization;
+    const decode = jwt.decodeToken(token);
+    const idUser = decode.idUser;
+    const photos = req.body.photos
+    if (photos === undefined || !photos)
+        return res.status(400).json({ code: 400, message: 'Bad request, some input are empty' });
+    else {
+        try {
+            JSON.parse(photos)
+        }
+        catch (e) {
+            return res.status(400).json({ code: 400, message: 'Bad input format we need JSON object' });
+        }
+    }
+    const obj = JSON.parse(photos)
+    if (Object.keys(obj).length !== 6) {
+        return res.status(400).json({ code: 400, message: 'Bad input format' });
+    }
+    else if (obj.profil && (obj.profil === 'img1' || obj.profil === 'img2' || obj.profil === 'img3' || obj.profil === 'img4' || obj.profil === 'img5')) {
+        model.updatePhotos(idUser, obj)
+            .then(data => {
+                if (data.rowCount !== 0)
+                    return res.status(201).json({ code: 201, message: 'Photos updated' })
+                else
+                    return res.status(400).json({ code: 400, message: 'Photos not updated' })
+            })
+            .catch(err => {
+                return res.status(400).json({ code: 400, message: 'Invalid request' });
+            })
+    }
+    else
+        return res.status(400).json({ code: 400, message: 'Bad input format' });
+}
+
 module.exports = {
     editUsername,
     editFirstname,
@@ -222,4 +257,5 @@ module.exports = {
     editPassword,
     editOrientation,
     editMail,
+    editPhotos,
 }

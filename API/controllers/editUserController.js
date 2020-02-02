@@ -36,6 +36,10 @@ const editMail = (req, res) => {
     editUserModel.editMail(req, res);
 }
 
+const editPhotos = (req, res) => {
+    editUserModel.editPhotos(req, res);
+}
+
 module.exports = {
     editUsername,
     editFirstname,
@@ -46,4 +50,5 @@ module.exports = {
     editPassword,
     editOrientation,
     editMail,
+    editPhotos,
 }
