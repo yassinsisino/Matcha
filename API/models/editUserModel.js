@@ -257,5 +257,5 @@ module.exports = {
     editPassword,
     editOrientation,
     editMail,
-    editPhotos,
+    editPhotos
 }
