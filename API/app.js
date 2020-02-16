@@ -1,6 +1,7 @@
 const http = require('http');
 const cors = require('cors');
 const express = require('express');
+const { checkDB } = require('./database/populateUsers')
 
 require('dotenv').load;
 
@@ -30,7 +31,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/user', userRoute);
 app.use('/api/edit', editUserRoute);
@@ -38,6 +39,7 @@ app.use('/api/tags', tagsRoute);
 app.use('/api/likes', likesRoute);
 app.use('/api/matches', matchesRoute);
 
-app.use('/', (req, res)=>{ res.status(404).json({ code: 404, message: 'Route not found'});})
+app.use('/', (req, res) => { res.status(404).json({ code: 404, message: 'Route not found' }); })
 
 server.listen(3000);
+checkDB(100); //ici mettre le nombre d'utilisateurs a generer 
