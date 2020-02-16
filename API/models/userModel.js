@@ -147,6 +147,7 @@ const login = async (req, res) => {
                         dateOfBirth: moment(user.rows[0].dateofbirth).format('YYYY-MM-DD'),
                         orientation: user.rows[0].orientation,
                         mailNotification: user.rows[0].mailNotification,
+                        mail: user.rows[0].mail,
                         photos: user.rows[0].photos,
                         tags: tags,
                         token: token,

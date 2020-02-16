@@ -2,7 +2,7 @@ const userModel = require('../models/userModel');
 const userAction = require('../models/userAction');
 const jwt = require('../utils/jwt');
 const htmlSpecialChars = require('htmlspecialchars');
-
+const moment = require('moment');
 
 const userSignup = (req, res) => {
     userModel.addUser(req, res);
@@ -87,16 +87,17 @@ const getUser = (req, res) => {
                 return res.status(200).json({
                     code: 200, users: {
                         iduser: data.rows[0].iduser,
-                        firstname: data.rows[0].firstname,
-                        lastname: data.rows[0].lastname,
+                        firstName: data.rows[0].firstname,
+                        lastName: data.rows[0].lastname,
                         username: data.rows[0].username,
-                        dateofbirth: data.rows[0].dateofbirth,
-                        bio: data.rows[0].bio,
+                        dateOfBirth: moment(data.rows[0].dateofbirth).format('YYYY-MM-DD'),
+                        bio: entities.decode(data.rows[0].bio),
                         gender: data.rows[0].gender,
                         orientation: data.rows[0].orientation,
                         score: data.rows[0].score,
-                        photo: data.rows[0].photos,
-                    }
+                        mail: data.rows[0].mail,
+                        photo: data.rows[0].photos
+                    },
                 })
 
         })
@@ -104,8 +105,6 @@ const getUser = (req, res) => {
             console.log('get user error', err);
             return res.status(400).json({ code: 400, message: 'Invalid request' });
         })
-    console.log(id)
-
 }
 
 module.exports = {
